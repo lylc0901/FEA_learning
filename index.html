@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Computational Mechanics Academy</title>
+
+    <!-- KaTeX for math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+
+    <!-- App styles -->
+    <link rel="stylesheet" href="src/styles/main.css">
+    <link rel="stylesheet" href="src/styles/components.css">
+</head>
+<body>
+
+<!-- ===================== APP SHELL ===================== -->
+<div id="app">
+
+    <!-- ---- HEADER ---- -->
+    <header id="app-header">
+        <div class="header-left">
+            <button id="sidebar-toggle" class="icon-btn" title="Toggle sidebar">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="20" height="20">
+                    <path fill-rule="evenodd" d="M3 5h14a1 1 0 010 2H3a1 1 0 010-2zm0 4h14a1 1 0 010 2H3a1 1 0 010-2zm0 4h14a1 1 0 010 2H3a1 1 0 010-2z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+            <div class="logo">
+                <span class="logo-icon">⚙</span>
+                <div class="logo-text">
+                    <span class="logo-main" data-i18n="appName">Computational Mechanics Academy</span>
+                    <span class="logo-sub" data-i18n="appTagline">From Fundamentals to FEM</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="header-center">
+            <div class="global-search">
+                <svg class="search-icon" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                </svg>
+                <input type="text" id="global-search-input" data-i18n-placeholder="searchPlaceholder" placeholder="Search lessons, formulas, glossary...">
+            </div>
+        </div>
+
+        <div class="header-right">
+            <button id="glossary-btn" class="header-btn" data-i18n="glossary">Glossary</button>
+            <div class="lang-switch">
+                <button class="lang-btn active" data-lang="vi">VI</button>
+                <span class="lang-sep">|</span>
+                <button class="lang-btn" data-lang="en">EN</button>
+            </div>
+            <div class="user-progress-mini">
+                <div class="progress-circle">
+                    <svg viewBox="0 0 36 36" width="36" height="36">
+                        <circle cx="18" cy="18" r="15" fill="none" stroke="#30363d" stroke-width="3"/>
+                        <circle id="progress-circle-arc" cx="18" cy="18" r="15" fill="none" stroke="#4fc3f7" stroke-width="3"
+                            stroke-dasharray="0 94.25" stroke-linecap="round" transform="rotate(-90 18 18)"/>
+                    </svg>
+                    <span id="progress-pct-mini">0%</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ---- BODY ---- -->
+    <div id="app-body">
+
+        <!-- LEFT: Sidebar Navigation -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h3 data-i18n="curriculum">Curriculum</h3>
+            </div>
+            <div id="curriculum-tree"></div>
+        </nav>
+
+        <!-- CENTER: Main Content Area -->
+        <main id="content-area">
+            <!-- Dashboard (default view) -->
+            <div id="view-dashboard" class="view active"></div>
+            <!-- Lesson view -->
+            <div id="view-lesson" class="view"></div>
+            <!-- Glossary view -->
+            <div id="view-glossary" class="view"></div>
+        </main>
+
+        <!-- RIGHT: Experiment / Notes Panel -->
+        <aside id="right-panel">
+            <div id="right-panel-content">
+                <div class="panel-placeholder">
+                    <div class="panel-placeholder-icon">🔬</div>
+                    <p data-i18n="selectLesson">Select a lesson to begin</p>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- ---- BOTTOM: Quiz / Progress Bar ---- -->
+    <div id="app-bottom">
+        <div id="lesson-progress-bar">
+            <div class="lpb-info">
+                <span id="lpb-lesson-title" data-i18n="noLesson">No lesson selected</span>
+                <span id="lpb-section-counter"></span>
+            </div>
+            <div class="lpb-track">
+                <div id="lpb-fill" style="width:0%"></div>
+            </div>
+            <div class="lpb-nav">
+                <button id="btn-prev-section" class="nav-btn" disabled data-i18n="prev">← Previous</button>
+                <button id="btn-next-section" class="nav-btn" disabled data-i18n="next">Next →</button>
+            </div>
+        </div>
+    </div>
+
+</div><!-- end #app -->
+
+<!-- ===================== MODALS ===================== -->
+<div id="modal-overlay" class="hidden">
+    <div id="modal-box">
+        <button id="modal-close" class="icon-btn">✕</button>
+        <div id="modal-content"></div>
+    </div>
+</div>
+
+<!-- ===================== TOAST NOTIFICATIONS ===================== -->
+<div id="toast-container"></div>
+
+<!-- ===================== SCRIPTS ===================== -->
+<!-- Load order: utilities → data → physics → content → components → app -->
+
+<!-- KaTeX -->
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<!-- Core utilities -->
+<script src="src/i18n.js"></script>
+<script src="src/data/curriculum.js"></script>
+<script src="src/data/glossary.js"></script>
+
+<!-- Physics engine -->
+<script src="src/physics/materials.js"></script>
+<script src="src/physics/mechanics.js"></script>
+<script src="src/physics/fem.js"></script>
+
+<!-- Content -->
+<script src="src/content/en/module0.js"></script>
+<script src="src/content/vi/module0.js"></script>
+<script src="src/content/en/module1.js"></script>
+<script src="src/content/vi/module1.js"></script>
+<script src="src/content/en/module2.js"></script>
+<script src="src/content/vi/module2.js"></script>
+<script src="src/content/en/module3.js"></script>
+<script src="src/content/vi/module3.js"></script>
+<script src="src/content/en/module4.js"></script>
+<script src="src/content/vi/module4.js"></script>
+<script src="src/content/en/module5.js"></script>
+<script src="src/content/vi/module5.js"></script>
+<script src="src/content/en/module6.js"></script>
+<script src="src/content/vi/module6.js"></script>
+<script src="src/content/en/module7.js"></script>
+<script src="src/content/vi/module7.js"></script>
+<script src="src/content/en/module8.js"></script>
+<script src="src/content/vi/module8.js"></script>
+<script src="src/content/en/module9.js"></script>
+<script src="src/content/vi/module9.js"></script>
+<script src="src/content/en/module10.js"></script>
+<script src="src/content/vi/module10.js"></script>
+<script src="src/content/en/module11.js"></script>
+<script src="src/content/vi/module11.js"></script>
+<script src="src/content/en/module12.js"></script>
+<script src="src/content/vi/module12.js"></script>
+<script src="src/content/en/module13.js"></script>
+<script src="src/content/vi/module13.js"></script>
+<script src="src/content/en/module14.js"></script>
+<script src="src/content/vi/module14.js"></script>
+<script src="src/content/en/module15.js"></script>
+<script src="src/content/vi/module15.js"></script>
+<script src="src/content/en/module16.js"></script>
+<script src="src/content/vi/module16.js"></script>
+<script src="src/content/en/module17.js"></script>
+<script src="src/content/vi/module17.js"></script>
+<script src="src/content/en/module18.js"></script>
+<script src="src/content/vi/module18.js"></script>
+<script src="src/content/en/module19.js"></script>
+<script src="src/content/vi/module19.js"></script>
+
+<!-- Simulations — sim-utils.js provides the registry and MUST load first -->
+<script src="src/simulations/sim-utils.js"></script>
+<script src="src/simulations/bar-interactive.js"></script>
+<script src="src/simulations/beam-interactive.js"></script>
+<script src="src/simulations/vibration-interactive.js"></script>
+<script src="src/simulations/thermal-interactive.js"></script>
+<script src="src/simulations/fem-interactive.js"></script>
+<script src="src/simulations/materials-interactive.js"></script>
+<script src="src/simulations/continuum-interactive.js"></script>
+<script src="src/simulations/numerical-interactive.js"></script>
+<script src="src/simulations/structural-interactive.js"></script>
+<script src="src/simulations/transient-interactive.js"></script>
+
+<!-- UI Components -->
+<script src="src/components/navigation.js"></script>
+<script src="src/components/dashboard.js"></script>
+<script src="src/components/lesson-renderer.js"></script>
+<script src="src/components/quiz.js"></script>
+<script src="src/components/progress.js"></script>
+
+<!-- Main application -->
+<script src="src/app.js"></script>
+
+</body>
+</html>
